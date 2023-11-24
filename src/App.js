@@ -1,12 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {YMaps, Placemark} from "@pbe/react-yandex-maps";
 import MyMap from "./MyMap";
+import {convertTimeFromIso} from "./utils/convertTime";
 function App() {
     const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState(0);
     const [movements, setMovements] = useState([])
     const [timeStart, setTimeStart] = useState("")
     const [timeEnd, setTimeEnd] = useState("")
+    const mapRef = useRef(null)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,9 +23,10 @@ function App() {
 
     const fetchRoute = async () => {
         const data = await fetch( "http://localhost:8080/movements/" + selectedUser + `?timeStart=${timeStart}&timeEnd=${timeEnd}`)
-        console.log(data)
         const json = await data.json()
-        console.log(json)
+        if(json)
+            // await mapRef.current.panTo([json[0].latitude, json[0].longitude], {safe: true, flying: false})
+            await mapRef.current.setCenter([json[0].latitude, json[0].longitude], 15, {duration: 500, timingFunction: "ease-in-out"})
         setMovements(json)
     }
 
@@ -38,17 +41,28 @@ function App() {
             })}
         </select>
         <label htmlFor="timeStart">Time start</label>
-        <input onChange={e => {console.log(e.target.value); setTimeStart(e.target.value)}} id="timeStart" type="datetime-local" />
+        <input onChange={e => setTimeStart(e.target.value)} id="timeStart" type="datetime-local" />
         <label htmlFor="timeEnd">Time end</label>
-        <input onChange={e => {console.log(e.target.value); setTimeEnd(e.target.value)}} id="timeEnd" type="datetime-local" />
+        <input onChange={e => setTimeEnd(e.target.value)} id="timeEnd" type="datetime-local" />
         <button onClick={() => fetchRoute()}>get routes</button>
         <YMaps>
-            <MyMap>
-                {movements.map(movement => {
-                    console.log([movement.latitude, movement.longitude])
+            <MyMap instRef={mapRef}>
+                {movements && movements.map(movement => {
                     return <React.Fragment key={movement.id}>
                         <Placemark
                             geometry={[movement.latitude, movement.longitude]}
+                            properties={{
+                                hintContent: `${movement.latitude}, ${movement.longitude}; ${convertTimeFromIso(movement.createdAt).toLocaleString()}`,
+                                balloonContent: `<h3>${movement.latitude}, ${movement.longitude}; ${convertTimeFromIso(movement.createdAt).toLocaleString()}</h3>`
+                            }}
+
+                            options={{
+                                preset: "islands#blackCircleDotIcon",
+                            }}
+
+                            modules={
+                                ['geoObject.addon.balloon', 'geoObject.addon.hint']
+                            }
                         />
                     </React.Fragment>
                 })}
