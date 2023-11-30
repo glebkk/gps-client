@@ -1,5 +1,5 @@
 import React from 'react';
-import {FullscreenControl, Map} from "@pbe/react-yandex-maps";
+import {FullscreenControl, Map, RoutePanel, RulerControl} from "@pbe/react-yandex-maps";
 
 function MyMap({children, instRef}) {
     console.log(instRef)
@@ -15,6 +15,7 @@ function MyMap({children, instRef}) {
         >
             {children}
             <FullscreenControl />
+            <RulerControl />
         </Map>
     );
 }

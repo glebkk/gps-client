@@ -1,6 +1,5 @@
 
 
-export function convertTimeFromIso(dateStr){
-    const date = new Date(dateStr);
-    return new Date(date.toISOString().slice(0, -1))
+export function convertTimeToLocaleTime(dateStr){
+    return new Date(Date.parse(dateStr)).toLocaleTimeString()
 }
