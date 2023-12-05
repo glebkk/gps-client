@@ -1,8 +1,7 @@
 import React from 'react';
-import {FullscreenControl, Map, RoutePanel, RulerControl} from "@pbe/react-yandex-maps";
+import {FullscreenControl, Map, RulerControl} from "@pbe/react-yandex-maps";
 
 function MyMap({children, instRef}) {
-    console.log(instRef)
     return (
         <Map
             instanceRef={instRef}
