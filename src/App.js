@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {YMaps, Placemark, Polyline} from "@pbe/react-yandex-maps";
+import {YMaps, Placemark, Polyline, Polygon} from "@pbe/react-yandex-maps";
 import MyMap from "./MyMap";
 import {convertTimeToLocaleTime} from "./utils/convertTime";
 import {getRandomColor} from "./utils/colors";
@@ -7,6 +7,7 @@ import {getRandomColor} from "./utils/colors";
 const baseUrl = "http://172.18.208.1:8080"
 function App() {
     const [users, setUsers] = useState([])
+    const [polygons, setPolygons] = useState([])
     const [selectedUserId, setSelectedUserId] = useState(0);
     const [movements, setMovements] = useState([])
     const [timeStart, setTimeStart] = useState("")
@@ -24,8 +25,16 @@ function App() {
         setUsers(json);
     }
 
+    const fetchPolygons = async () => {
+        const data = await fetch(`${baseUrl}/polygons`)
+        const json = await data.json()
+        console.log(json)
+        setPolygons(json)
+    }
+
     useEffect(() => {
         fetchData().catch(console.error);
+        fetchPolygons().catch()
     }, [])
 
 
@@ -127,6 +136,20 @@ function App() {
                         />
                     </>
                 }
+
+                {polygons && polygons.map(polygon => {
+                    console.log(polygon.geometry.coordinates)
+                    return <Polygon
+                        key={polygon.id}
+                        geometry={polygon.geometry.coordinates}
+
+                        options={{
+                            strokeColor: "#67a9ff",
+                            strokeWidth: 3,
+                            fillColor: "#ff84f9"
+                        }}
+                    />
+                })}
 
 
                 {movements && movements.map(movement => {
