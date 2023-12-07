@@ -4,7 +4,7 @@ import MyMap from "./MyMap";
 import {convertTimeToLocaleTime} from "./utils/convertTime";
 import {getRandomColor} from "./utils/colors";
 
-const baseUrl = "http://172.18.208.1:8080"
+export const baseUrl = "http://172.18.208.1:8080"
 function App() {
     const [users, setUsers] = useState([])
     const [polygons, setPolygons] = useState([])
@@ -56,10 +56,10 @@ function App() {
                 setUserMove(prev => {
                     return [...prev, [data.latitude, data.longitude]]
                 })
-                await mapRef.current.setCenter([data.latitude, data.longitude], mapRef.current.zoomRange.getCurrent()[1], {
-                    duration: 2000,
-                    timingFunction: "ease-in-out"
-                })
+                // await mapRef.current.setCenter([data.latitude, data.longitude], mapRef.current.zoomRange.getCurrent()[1], {
+                //     duration: 2000,
+                //     timingFunction: "ease-in-out"
+                // })
             };
 
             socket.current.onclose = () => {
@@ -138,7 +138,6 @@ function App() {
                 }
 
                 {polygons && polygons.map(polygon => {
-                    console.log(polygon.geometry.coordinates)
                     return <Polygon
                         key={polygon.id}
                         geometry={polygon.geometry.coordinates}
@@ -146,6 +145,7 @@ function App() {
                         options={{
                             strokeColor: "#67a9ff",
                             strokeWidth: 3,
+                            fillOpacity: 0.5,
                             fillColor: "#ff84f9"
                         }}
                     />
