@@ -3,6 +3,7 @@ import {YMaps, Placemark, Polyline, Polygon} from "@pbe/react-yandex-maps";
 import MyMap from "./MyMap";
 import {convertTimeToLocaleTime} from "./utils/convertTime";
 import {getRandomColor} from "./utils/colors";
+import moment from 'moment'
 
 export const baseUrl = "http://172.18.208.1:8080"
 function App() {
@@ -16,7 +17,9 @@ function App() {
     const [center, setCenter] = useState([])
     const [userMove, setUserMove] = useState([])
     const [isTracking, setIsTracking] = useState(false)
+    const [userVisits, setUserVisits] = useState([])
     const socket = useRef(null)
+
 
     const fetchData = async () => {
         const data = await fetch(`${baseUrl}/users`);
@@ -66,7 +69,6 @@ function App() {
                 console.log('WebSocket connection closed');
                 alert(`Пользователь ${users[selectedUserId - 1].name} выключил трекер`)
                 setIsTracking(false)
-                setUserMove([])
                 setCenter([])
                 fetchData().then()
             };
@@ -75,14 +77,22 @@ function App() {
         socket.current.close()
     }
 
+    const fetchVisits = async () => {
+        const data = await fetch(`${baseUrl}/visits?id=${selectedUserId}`)
+        const json = await data.json()
+        setUserVisits(json)
+        console.log(json)
+    }
+
 
     const fetchRoute = async () => {
         const data = await fetch( `${baseUrl}/movements/` + selectedUserId + `?timeStart=${timeStart}&timeEnd=${timeEnd}`)
         const json = await data.json()
-        if(json)
+        // if(json)
             // await mapRef.current.panTo([json[0].latitude, json[0].longitude], {safe: true, flying: false})
-            await mapRef.current.setCenter([json[0].latitude, json[0].longitude], 15, {duration: 1000, timingFunction: "ease-in-out"})
+            // await mapRef.current.setCenter([json[0].latitude, json[0].longitude], 15, {duration: 1000, timingFunction: "ease-in-out"})
         setMovements(json)
+        await fetchVisits()
     }
 
     return (
@@ -138,9 +148,21 @@ function App() {
                 }
 
                 {polygons && polygons.map(polygon => {
+                    let hint
+                    if(userVisits){
+                        for(const visit of userVisits){
+                            if(visit.polygonId === polygon.id){
+                                hint = `${visit.timeEntry} ${visit.timeExit} ${moment(Date.parse(visit.timeExit) - Date.parse(visit.timeEntry)).format('hh:mm:ss')}`
+                            }
+                        }
+                    }
                     return <Polygon
                         key={polygon.id}
                         geometry={polygon.geometry.coordinates}
+                        properties={{
+                            balloonContent: hint,
+                            hintContent: hint
+                        }}
 
                         options={{
                             strokeColor: "#67a9ff",
@@ -165,9 +187,7 @@ function App() {
                                 preset: "islands#blackCircleDotIcon",
                             }}
 
-                            modules={
-                                ['geoObject.addon.balloon', 'geoObject.addon.hint']
-                            }
+
                         />
                     </React.Fragment>
                 })}

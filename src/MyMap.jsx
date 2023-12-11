@@ -37,6 +37,9 @@ function MyMap({children, instRef}) {
                 defaultState={{
                     center: [55.182840, 30.203094], zoom: 15
                 }}
+                modules={
+                    ['geoObject.addon.balloon', 'geoObject.addon.hint']
+                }
             >
                 {polygonCoordinates.length > 0 && (
                     <Polygon
