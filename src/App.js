@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {YMaps, Placemark, Polyline, Polygon} from "@pbe/react-yandex-maps";
 import MyMap from "./MyMap";
-import {convertTimeToLocaleTime} from "./utils/convertTime";
+import {Abc, convertTimeToLocaleTime, getDiffBetweenDates} from "./utils/convertTime";
 import {getRandomColor} from "./utils/colors";
 import moment from 'moment'
 
@@ -152,7 +152,7 @@ function App() {
                     if(userVisits){
                         for(const visit of userVisits){
                             if(visit.polygonId === polygon.id){
-                                hint = `${visit.timeEntry} ${visit.timeExit} ${moment(Date.parse(visit.timeExit) - Date.parse(visit.timeEntry)).format('hh:mm:ss')}`
+                                hint = `${convertTimeToLocaleTime(visit.timeEntry)} ${convertTimeToLocaleTime(visit.timeExit)} ${getDiffBetweenDates(visit.timeExit,visit.timeEntry)}`
                             }
                         }
                     }
